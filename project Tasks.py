@@ -4,7 +4,7 @@
 1.2 Fetch airport data.
 1.3 (Optional) Update player location or score in the database.
 
-2. Game Initialization 
+2. Game Initialization (done)
 2.1 Initialize player position (starting airport).
 2.2 Initialize any resources (e.g., fuel, points).
 
@@ -29,3 +29,7 @@
 6.1 Check if objective is reached (e.g., visited all airports or reached goal).
 6.2 Display final score or message.
 """
+
+
+
+# python main.py

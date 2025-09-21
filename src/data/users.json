@@ -2,7 +2,7 @@
     "users": [
         {
             "name": "abdullah",
-            "current_airport_of_user": "EFPR",
+            "location": "EFPR",
             "battery": 100,
             "flights": 0
         }
