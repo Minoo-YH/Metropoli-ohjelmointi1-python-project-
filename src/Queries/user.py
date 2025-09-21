@@ -53,8 +53,7 @@ def battery_of_user():
     elif user['battery'] < 25:
         print(f"You cannot travel. Battery: {user['battery']}%")
         charge_battery = input(
-            "If you want to charge your battery to travel, type (Y/N): "
-        ).capitalize() 
+            "If you want to charge your battery to travel, type (Y/N): ").capitalize() 
         if charge_battery == "Y":
             user['battery'] = 100
             update_user(users) 

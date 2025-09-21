@@ -16,6 +16,6 @@ def get_users():
     return load_json(config.USERS_FILE)["users"] 
 
 def update_user(users):
-    data = {"users": users}  # نضع القائمة داخل نفس المفتاح عند الحفظ
+    data = {"users": users} 
     save_json(config.USERS_FILE, data)
     return users
