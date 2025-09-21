@@ -1,0 +1,40 @@
+from  context.run import run_query
+
+def get_airports():
+    airports = run_query("SELECT ident, name FROM airport")
+    for airport in airports:
+        print(f"ID: {airport[0]}, Name: {airport[1]}")
+    return airports
+
+
+
+def get_airports_iso_country():
+    iso_country=input("Type ur country_code :==>  ")
+
+    airports = run_query(
+       "SELECT * FROM airport WHERE iso_country = %s",
+        (iso_country,)
+    )
+    if airports:
+        print(f"\nAirports in {iso_country}:")
+        for airport in airports:
+            print(f"ID: {airport[0]}, Name: {airport[1]}")
+    else:
+        print(f"No airports found in {iso_country}")
+    return airports
+
+
+def get_airports_code():
+    iso_country=input("Type ur country_code :==>  ")
+
+    airports = run_query(
+        "SELECT ident, name FROM airport WHERE iso_country = %s",
+        (iso_country,)
+    )
+    if airports:
+        print(f"\nAirports in {iso_country}:")
+        for airport in airports:
+            print(f"ID: {airport[0]}, Name: {airport[1]}")
+    else:
+        print(f"No airports found in {iso_country}")
+    return airports
