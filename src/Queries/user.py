@@ -57,6 +57,7 @@ def battery_of_user():
         if charge_battery == "Y":
             user['battery'] = 100
             update_user(users) 
+            
             print("Battery charged to 100%!")
         elif charge_battery == "N":
             print(f"{user['battery']}% is less than 25. You cannot travel.")
