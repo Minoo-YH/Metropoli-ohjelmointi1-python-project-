@@ -2,10 +2,12 @@
     "users": [
         {
             "name": "abdullah",
-            "location": 
-                "Ylivieska Airfield",
-            "battery": 100,
-            "flights": 4
+            "location": [
+                "EFVU",
+                "Vuotso Airfield"
+            ],
+            "battery": 75,
+            "flights": 5
         }
     ]
 }
