@@ -38,7 +38,6 @@ def get_airports_code():
 
 
 
-# in processing
 def get_one_airport(): 
     chosen_ident = input("Choose your destination airport by ID: ==> ").strip()
     airports = run_query(

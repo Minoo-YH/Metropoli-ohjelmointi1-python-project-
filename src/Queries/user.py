@@ -24,7 +24,6 @@ def get_user_by_name():
     print("User not found.")
     return None
 
-
 def current_airport():
     user = get_user_by_name()
     if not user:
@@ -42,7 +41,6 @@ def current_airport():
         print(f"Coordinates: ({airport[4]}, {airport[5]})")
     else:
         print("No airport found.")
-
 
 def battery_of_user():
     global user
@@ -67,9 +65,6 @@ def battery_of_user():
             print(f"{user['battery']}% is less than 25. You cannot travel.")
         else:
             print("Wrong input")
-
-
-
 
 def destination_airport():
     user = get_user_by_name()
