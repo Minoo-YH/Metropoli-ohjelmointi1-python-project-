@@ -1,7 +1,9 @@
 from context.run import run_query
 from data_loader import get_users,update_user
-from  Queries.airports import get_airports_iso_country
-users = None,current_user = None ,user= None
+from  Queries.airports import get_airports_iso_country,get_one_airport
+users = None
+current_user = None 
+user= None
 
 
 def get_user_by_name():
@@ -27,9 +29,11 @@ def current_airport():
     user = get_user_by_name()
     if not user:
         return
-    
-    ident= user.get("location")
+   
+   
+    ident = user.get("location")[0]
     airports = run_query("SELECT * FROM airport WHERE ident = %s",(ident,))
+    
     if airports:
         airport = airports[0]  
         print(f"Airport Name: {airport[3]}")
@@ -38,6 +42,7 @@ def current_airport():
         print(f"Coordinates: ({airport[4]}, {airport[5]})")
     else:
         print("No airport found.")
+
 
 def battery_of_user():
     global user
@@ -66,12 +71,19 @@ def battery_of_user():
 
 
 
-# in processing
 def destination_airport():
-    destination_input=input("where do U want to go  type country (code) like (FI,US,SW)").upper()
+    user = get_user_by_name()
+    destination_input = input("Where do you want to go? Type country code (e.g., FI, US, SW): ").upper()
     get_airports_iso_country(destination_input)
-    choes_destination_input=input(" this is all airports in the  country choes one :==> ")
-    print(choes_destination_input)
+    user_data = get_one_airport() 
 
-
+    if user_data:
+        user['battery'] -= 25
+        user['location'] = user_data  
+        user['flights'] += 1
+        update_user(users)
+        print(f"Traveled to {user_data} \n. Battery: {user['battery']} \n, Flights: {user['flights']}")
+    else:
+        print("No airport selected. User data remains:")
+        print(user)
 

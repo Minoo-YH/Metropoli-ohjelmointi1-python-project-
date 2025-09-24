@@ -2,9 +2,10 @@
     "users": [
         {
             "name": "abdullah",
-            "location": "EFPR",
+            "location": 
+                "Ylivieska Airfield",
             "battery": 100,
-            "flights": 0
+            "flights": 4
         }
     ]
 }
