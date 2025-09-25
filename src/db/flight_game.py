@@ -1,4 +1,4 @@
-import mysql.connector,os,sys
+import mysql.connector,os
 from dotenv import load_dotenv
 
 
@@ -16,7 +16,6 @@ def get_connection():
 
 
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 

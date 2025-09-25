@@ -5,6 +5,9 @@ def get_airports():
     for airport in airports:
         print(f"ID: {airport[0]}, Name: {airport[1]}")
     return airports
+
+
+
 def get_airports_iso_country(iso_country):
     airports = run_query(
        "SELECT * FROM airport WHERE iso_country = %s",
@@ -17,6 +20,9 @@ def get_airports_iso_country(iso_country):
     else:
         print(f"No airports found in {iso_country}")
     return airports
+
+
+
 def get_airports_code():
     iso_country=input("Type ur country_code :==>  ")
 
@@ -35,19 +41,25 @@ def get_airports_code():
 
 
 
-
-
-
-def get_one_airport(): 
+def get_one_airport():
     chosen_ident = input("Choose your destination airport by ID: ==> ").strip()
     airports = run_query(
-        "SELECT ident, name FROM airport WHERE ident = %s",
+        """
+        SELECT ident, name, latitude_deg, iso_country
+        FROM airport
+        WHERE ident = %s
+        """,
         (chosen_ident,)
     )
     if airports:
         airport = airports[0]
-        print(f"You selected: {airport[1]} (ID: {airport[0]})")
+        columns = ["ident", "name", "latitude_deg", "iso_country"]
+        print("=== Airport Information ===")
+        print("Welcom")
+        for col, val in zip(columns, airport):
+            print(f"{col}: {val}")
         return airport
     else:
         print("Invalid airport ID.")
         return None
+
