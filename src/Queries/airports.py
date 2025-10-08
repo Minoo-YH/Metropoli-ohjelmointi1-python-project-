@@ -2,14 +2,6 @@ from context.run import run_query
 
 current_ident = None 
 
-def get_airports():
-    try:
-        airports = run_query("SELECT ident, name FROM airport")
-        for airport in airports:
-            print(f"ID: {airport[0]}, Name: {airport[1]}")
-        return airports
-    except Exception as e:
-        print(f"An Err: {e}")
 
 
 def get_airports_iso_country(iso_country):
@@ -85,6 +77,7 @@ def get_one_airport(current_location=None):
                 columns = ["ident", "name", "latitude_deg", "longitude_deg", "iso_country"]
                 for col, val in zip(columns, airport):
                     print(f"{col}: {val}")
+                print("==============================\n")
                 return airport
             else:
                 print("Invalid airport ID. Try again or type C to cancel.")
