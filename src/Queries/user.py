@@ -22,9 +22,7 @@ def user_register():
         """
         values = (username, email, hashed_password.decode('utf-8'), location, battery)
         run_query(query, values)
-
-        query_get_user = "SELECT * FROM users WHERE username = %s"
-        current_user = run_query(query_get_user, (username,), fetchone=True)
+        
         print("User registered successfully!")
     except Exception as e:
         print(F"An Err {e}")
@@ -38,7 +36,7 @@ def user_login():
         password = input("Enter password: ")
 
         query = """
-            SELECT u.id, u.username, u.email, u.password, u.location, u.battery, u.KM,
+            SELECT u.id, u.username, u.email, u.password, u.location, u.battery, u.KM,u.membership,
                    a.ident, a.latitude_deg, a.longitude_deg
             FROM users u
             JOIN airport a ON u.location = a.ident
@@ -49,8 +47,8 @@ def user_login():
 
         if result:
             columns = [
-                'id', 'username', 'email', 'password', 'location',
-                'battery', 'KM', 'ident', 'latitude_deg', 'longitude_deg'
+                 'id', 'username', 'email', 'password', 'location',
+                'battery', 'KM', 'membership', 'ident', 'latitude_deg', 'longitude_deg'
             ]
             user = dict(zip(columns, result))
 
@@ -60,7 +58,7 @@ def user_login():
                 user.pop('password', None)
                 current_user = user
                 print("LogIn successfully!")
-                print(current_user)
+      
                   
                 return True
                
@@ -124,7 +122,6 @@ def user_update():
                 current_user["battery"] = float(result[0])
                 current_user["location"] = choice_next_stop[0]
 
-                print(f"User {current_user['username']} battery: {current_user['battery']:.2f} location: {choice_next_stop[0]}")
             else:
                 print("Error: battery not fetched after update.")
         else:
@@ -154,7 +151,7 @@ def user_update_battry():
         print(F"An Err {e}")
 
 
-def next_stop(current_user):
+def next_stop(current_user= None):
     global choice_next_stop
     if not current_user:
         print("Error: No current user is logged in.")
@@ -184,52 +181,72 @@ def next_stop(current_user):
         return None
 
     choice_next_stop = chosen_airport
-    user_update()
+
+ 
+
     distance = haversine(
         current_user["latitude_deg"],
         current_user["longitude_deg"],
-        chosen_airport[2],
-        chosen_airport[3]
+        float(chosen_airport[2]),
+        float(chosen_airport[3])
     )
+  
+
     insert_km(current_user, distance)
     return choice_next_stop
-
 
 
 def insert_km(user, distance):
     user_id = user["id"]
     KM = float(distance)
 
+
     query = """
         UPDATE users
         SET KM = COALESCE(KM, 0) + %s
         WHERE id = %s
     """
-    run_query(query, (KM, user_id,))
-    
+    run_query(query, (KM, user_id))
+
+
     check = run_query("SELECT KM FROM users WHERE id = %s", (user_id,), fetchone=True)
     total_km = check[0] if check else 0
 
-    print(f"{user['username']}, you have traveled an additional {KM:.2f} km. ")
-    print(f" Total distance traveled with us: {total_km:.2f} km.")
+
+    if 1000 <= total_km <= 100000:
+        membership = "Gold"
+    elif total_km > 100000:
+        membership = "Diamond"
+    else:
+        membership = "Silver"
+
+   
+    membership_query = """
+        UPDATE users
+        SET membership = %s
+        WHERE id = %s
+    """
+    run_query(membership_query, (membership, user_id))
+
+
+    print("\n=====  =====")
+    print(f"{user['username']}, you have traveled an additional {KM:.2f} km.")
+    print(f"Total distance traveled with us: {total_km:.2f} km.")
+    print(f"Current membership: {membership}")
+    print("==============================\n")
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def user_info(current_user):
+    print("\n===== User Information =====")
+    print(f"Username       : {current_user.get('username', 'Unknown')}")
+    print(f"Email          : {current_user.get('email', 'Unknown')}")
+    print(f"Location       : {current_user.get('location', 'Unknown')}")
+    print(f"Battery        : {current_user.get('battery', 0)}%")
+    print(f"Travelled      : {current_user.get('KM', 0)} km")
+    print(f"membership     : {current_user.get('membership')}")
+    print("==============================\n")
 
 
 
@@ -242,21 +259,4 @@ def user_logout():
         current_user= None
     except Exception as e:
         print(F"An Err {e}")
-
-
-
-def user_tabel():
-    try:
-        users=run_query("SELECT id, username, email,location,battery,Km from users")
-        for user in users:
-            print(f"ID: => {user[0]},\n"
-                f"username: => {user[1]},\n"
-                f"email: => {user[2]},\n"
-                f"location: => {user[3]},\n"
-                f"battery: => {user[4]},\n"
-                f"Km: => {user[8]}")
-                
-    except Exception as e:
-        print(F"An Err {e}")
-
 
