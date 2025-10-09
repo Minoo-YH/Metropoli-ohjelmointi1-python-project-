@@ -1,4 +1,7 @@
-from Queries.user import user_register, user_login, user_delete, next_stop, user_info, user_logout , current_user
+from Queries.user import (
+    user_register, user_login, user_delete,
+    next_stop, user_info, user_logout, current_user
+)
 
 def main():
     current_user = None

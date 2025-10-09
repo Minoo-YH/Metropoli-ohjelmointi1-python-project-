@@ -3,7 +3,6 @@ from context.run import run_query
 current_ident = None 
 
 
-
 def get_airports_iso_country(iso_country):
     try:
         airports = run_query(
