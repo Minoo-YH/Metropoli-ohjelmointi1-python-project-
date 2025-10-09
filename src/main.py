@@ -1,4 +1,5 @@
-from Queries.user import user_register, user_login, user_delete, next_stop, user_info, user_logout , current_user
+from Queries.user import user_register, user_login, user_delete, next_stop, user_info, user_logout, current_user, user_update
+from context.run import run_query
 
 def main():
     current_user = None
@@ -36,7 +37,18 @@ def main():
                 print("Invalid choice, please register or login first.")
         else:
             if choice == "3":
-                next_stop(current_user)
+                ns = next_stop(current_user)
+                if ns:
+                    user_update()  # ← اضافه شد: باتری/لوکیشن آپدیت شود
+                    # ← اختیاری ولی مفید: رفرش current_user از DB
+                    cu = run_query("""
+                        SELECT u.location, u.battery, u.KM, u.membership, a.latitude_deg, a.longitude_deg
+                        FROM users u
+                        JOIN airport a ON u.location = a.ident
+                        WHERE u.id = %s
+                    """, (current_user['id'],), fetchone=True)
+                    if cu:
+                        current_user.update(cu)
             elif choice == "4":
                 user_info(current_user)
             elif choice == "8":

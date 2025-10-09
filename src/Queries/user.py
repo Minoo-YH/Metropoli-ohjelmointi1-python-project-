@@ -1,10 +1,11 @@
 from context.run import run_query
-from  Queries.airports import get_airports_iso_country,get_one_airport
+from Queries.airports import get_airports_code, get_one_airport
 from context.utils import haversine
 import bcrypt
 
 choice_next_stop = None
-current_user= None
+current_user = None
+
 
 def user_register():
     try:
@@ -17,18 +18,17 @@ def user_register():
         battery = 100.0
 
         query = """
-            INSERT INTO users (username, email, password, location, battery)
-            VALUES (%s, %s, %s, %s, %s)
-        """
+                INSERT INTO users (username, email, password, location, battery)
+                VALUES (%s, %s, %s, %s, %s) \
+                """
         values = (username, email, hashed_password.decode('utf-8'), location, battery)
         run_query(query, values)
-        
+
         print("User registered successfully!")
     except Exception as e:
-        print(F"An Err {e}")
+        print(f"An Err {e}")
 
 
-    
 def user_login():
     global current_user
     try:
@@ -36,44 +36,41 @@ def user_login():
         password = input("Enter password: ")
 
         query = """
-            SELECT u.id, u.username, u.email, u.password, u.location, u.battery, u.KM,u.membership,
-                   a.ident, a.latitude_deg, a.longitude_deg
-            FROM users u
-            JOIN airport a ON u.location = a.ident
-            WHERE u.username = %s
-        """
-
+                SELECT u.id, \
+                       u.username, \
+                       u.email, \
+                       u.password, \
+                       u.location, \
+                       u.battery, \
+                       u.KM, \
+                       u.membership,
+                       a.ident, \
+                       a.latitude_deg, \
+                       a.longitude_deg
+                FROM users u
+                         JOIN airport a ON u.location = a.ident
+                WHERE u.username = %s \
+                """
         result = run_query(query, (username,), fetchone=True)
 
         if result:
-            columns = [
-                 'id', 'username', 'email', 'password', 'location',
-                'battery', 'KM', 'membership', 'ident', 'latitude_deg', 'longitude_deg'
-            ]
-            user = dict(zip(columns, result))
-
+            user = dict(result)
             stored_password = user['password']
 
             if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
                 user.pop('password', None)
                 current_user = user
                 print("LogIn successfully!")
-      
-                  
                 return True
-               
             else:
                 print("Wrong password")
                 return False
         else:
             print("Wrong username")
             return False
-        
+
     except Exception as e:
-        print(F"An Err {e}")
-
-
-  
+        print(f"An Err {e}")
 
 
 def user_delete():
@@ -81,11 +78,11 @@ def user_delete():
         global current_user
         if current_user is not None:
             delete_input = input("Type Yes if you want to delete your account (Y): ").upper()
-            if delete_input == "Y": 
+            if delete_input == "Y":
                 if isinstance(current_user, dict):
-                    username = current_user.get("username") 
+                    username = current_user.get("username")
                 else:
-                    username = current_user 
+                    username = current_user
                 query = "DELETE FROM users WHERE username = %s"
                 values = (username,)
                 run_query(query, values)
@@ -107,21 +104,20 @@ def user_update():
             print("Error: current_user or choice_next_stop not set.")
             return
         update_query = """
-            UPDATE users
-            SET battery = GREATEST(battery * 0.75, 0),
-                location = %s
-            WHERE id = %s
-        """
-        rows_affected = run_query(update_query, (str(choice_next_stop[0]), int(current_user["id"])))
+                       UPDATE users
+                       SET battery  = GREATEST(battery * 0.75, 0),
+                           location = %s
+                       WHERE id = %s \
+                       """
+        rows_affected = run_query(update_query, (str(choice_next_stop['ident']), int(current_user["id"])))
 
         if rows_affected > 0:
             select_query = "SELECT battery FROM users WHERE id = %s"
             result = run_query(select_query, (int(current_user["id"]),), fetchone=True)
 
             if result:
-                current_user["battery"] = float(result[0])
-                current_user["location"] = choice_next_stop[0]
-
+                current_user["battery"] = float(result["battery"])
+                current_user["location"] = choice_next_stop['ident']
             else:
                 print("Error: battery not fetched after update.")
         else:
@@ -134,63 +130,66 @@ def user_update():
 def user_update_battry():
     try:
         global current_user
-
-        if not current_user :
+        if not current_user:
             print("Error: current_user .")
             return
 
-        query= """
-            UPDATE users 
-            SET battery = 100
-            WHERE id = %s
-    """
-        current_user["battery"] = 100  
-        run_query(query,(int(current_user["id"]),))
+        query = """
+                UPDATE users
+                SET battery = 100
+                WHERE id = %s \
+                """
+        current_user["battery"] = 100
+        run_query(query, (int(current_user["id"]),))
         print(f"User {current_user['username']} battery 100 .")
     except Exception as e:
-        print(F"An Err {e}")
+        print(f"An Err {e}")
 
 
-def next_stop(current_user= None):
+def next_stop(current_user=None):
     global choice_next_stop
     if not current_user:
         print("Error: No current user is logged in.")
-        return 
-    
-    if current_user['battery'] <= 25:
-            charging = input("UR battery under 25. You can not travel. If you want to charge, type (Y):=>").upper()
-            if charging == "Y": 
-                user_update_battry()
-                current_user["battery"] = 100
-                print(f"Your battery is {current_user['battery']}.")
-            else:
-                print("U can not travel.")
-                return None
+        return
 
+    try:
+        battery_val = int(current_user.get('battery', 0))
+    except Exception:
+        battery_val = 0
+
+    if battery_val <= 25:
+        charging = input("UR battery under 25. You can not travel. If you want to charge, type (Y):=>").upper()
+        if charging == "Y":
+            user_update_battry()
+            current_user["battery"] = 100
+            print(f"Your battery is {current_user['battery']}.")
+        else:
+            print("U can not travel.")
+            return None
 
     destination_input = input("Where do you want to go? Type country code (e.g., FI, US, SW): ").upper()
-    airports = get_airports_iso_country(destination_input)
+    airports = get_airports_code(destination_input)
 
     if not airports:
         print("No airports found for this country.")
         return None
 
-    chosen_airport = get_one_airport(current_user.get("location"))
+    print("\nType the AIRPORT IDENT you want to go (e.g., EFHK):")
+    target_ident = input("Ident: ==> ").strip().upper()
+
+    chosen_airport = get_one_airport(target_ident)
     if not chosen_airport:
         print("No next stop selected.")
         return None
 
     choice_next_stop = chosen_airport
 
- 
-
     distance = haversine(
-        current_user["latitude_deg"],
-        current_user["longitude_deg"],
-        float(chosen_airport[2]),
-        float(chosen_airport[3])
+        float(current_user["latitude_deg"]),
+        float(current_user["longitude_deg"]),
+        float(chosen_airport["latitude_deg"]),
+        float(chosen_airport["longitude_deg"])
     )
-  
 
     insert_km(current_user, distance)
     return choice_next_stop
@@ -200,18 +199,15 @@ def insert_km(user, distance):
     user_id = user["id"]
     KM = float(distance)
 
-
     query = """
-        UPDATE users
-        SET KM = COALESCE(KM, 0) + %s
-        WHERE id = %s
-    """
+            UPDATE users
+            SET KM = COALESCE(KM, 0) + %s
+            WHERE id = %s \
+            """
     run_query(query, (KM, user_id))
 
-
     check = run_query("SELECT KM FROM users WHERE id = %s", (user_id,), fetchone=True)
-    total_km = check[0] if check else 0
-
+    total_km = check["KM"] if check else 0
 
     if 1000 <= total_km <= 100000:
         membership = "Gold"
@@ -220,22 +216,18 @@ def insert_km(user, distance):
     else:
         membership = "Silver"
 
-   
     membership_query = """
-        UPDATE users
-        SET membership = %s
-        WHERE id = %s
-    """
+                       UPDATE users
+                       SET membership = %s
+                       WHERE id = %s \
+                       """
     run_query(membership_query, (membership, user_id))
-
 
     print("\n=====  =====")
     print(f"{user['username']}, you have traveled an additional {KM:.2f} km.")
     print(f"Total distance traveled with us: {total_km:.2f} km.")
     print(f"Current membership: {membership}")
     print("==============================\n")
-
-
 
 
 def user_info(current_user):
@@ -249,14 +241,12 @@ def user_info(current_user):
     print("==============================\n")
 
 
-
-
-
 def user_logout():
     try:
         global current_user
         print(f" User {current_user['username']}  logged out.")
-        current_user= None
+        current_user = None
     except Exception as e:
-        print(F"An Err {e}")
+        print(f"An Err {e}")
+
 
