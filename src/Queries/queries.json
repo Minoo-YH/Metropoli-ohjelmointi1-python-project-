@@ -1,0 +1,16 @@
+{
+  "user_login": "SELECT u.id, u.username, u.email, u.password, u.location, u.battery, u.KM, u.membership, a.ident, a.latitude_deg, a.longitude_deg FROM users u JOIN airport a ON u.location = a.ident WHERE u.username = %s",
+  "register": "INSERT INTO users (username, email, password, location, battery) VALUES (%s, %s, %s, %s, %s)",
+  "delete_user": "DELETE FROM users WHERE username = %s",
+  "update_user_location": "UPDATE users SET battery = GREATEST(battery * 0.75, 0), location = %s WHERE id = %s",
+  "update_user_battery": "UPDATE users SET battery = 100 WHERE id = %s",
+  "get_user_km": "SELECT KM FROM users WHERE id = %s",
+  "update_user_km": "UPDATE users SET KM = %s WHERE id = %s",
+  "update_user_membership": "UPDATE users SET membership = %s WHERE id = %s",
+  "get_all_airports": "SELECT ident, name, municipality, iso_country FROM airport ORDER BY name LIMIT 20 OFFSET %s",
+
+
+  "get_airports_code": "SELECT ident, name FROM airport WHERE iso_country = %s ORDER BY name"
+
+
+}
