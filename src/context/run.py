@@ -1,4 +1,5 @@
-﻿from db.flight_game import get_connection
+﻿from src.db.flight_game import get_connection
+
 
 def run_query(query, params=None, fetchone=False):
     conn = get_connection()

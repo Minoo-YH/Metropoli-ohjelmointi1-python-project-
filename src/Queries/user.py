@@ -1,7 +1,7 @@
-from context.run import run_query
-from Queries.airports import get_airports_code, get_one_airport
-from context.utils import haversine
-from Queries.sql import query
+from src.context.run import run_query
+from src.Queries.airports import get_airports_code, get_one_airport
+from src.context.utils import haversine
+from src.Queries.sql import query
 import bcrypt
 
 choice_next_stop = None

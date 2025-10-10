@@ -1,5 +1,5 @@
-﻿from context.run import run_query
-from Queries.sql import query
+﻿from src.context.run import run_query
+from src.Queries.sql import query
 
 current_ident = None
 
