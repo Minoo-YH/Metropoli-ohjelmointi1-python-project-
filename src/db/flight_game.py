@@ -1,28 +1,12 @@
-<<<<<<< HEAD
-﻿import os
-from dotenv import load_dotenv
-import mysql.connector
-=======
-﻿import mysql.connector,os
+import mysql.connector,os
 from dotenv import load_dotenv
 
->>>>>>> nipa_1
 
 load_dotenv()
 
 def get_connection():
     return mysql.connector.connect(
-<<<<<<< HEAD
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME", "flight_game"),
-        port=int(os.getenv("DB_PORT", "3306")),
-        autocommit=True,
-        use_pure=True,
-        ssl_disabled=True
-    )
-=======
+
         host=os.getenv("DB_HOST"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
@@ -35,5 +19,3 @@ def get_connection():
 
 
 
-
->>>>>>> nipa_1
