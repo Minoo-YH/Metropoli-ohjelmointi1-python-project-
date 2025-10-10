@@ -37,18 +37,8 @@ def main():
                 print("Invalid choice, please register or login first.")
         else:
             if choice == "3":
-                ns = next_stop(current_user)
-                if ns:
-                    user_update()  # ← اضافه شد: باتری/لوکیشن آپدیت شود
-                    # ← اختیاری ولی مفید: رفرش current_user از DB
-                    cu = run_query("""
-                        SELECT u.location, u.battery, u.KM, u.membership, a.latitude_deg, a.longitude_deg
-                        FROM users u
-                        JOIN airport a ON u.location = a.ident
-                        WHERE u.id = %s
-                    """, (current_user['id'],), fetchone=True)
-                    if cu:
-                        current_user.update(cu)
+                 next_stop(current_user)
+ 
             elif choice == "4":
                 user_info(current_user)
             elif choice == "8":

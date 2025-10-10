@@ -147,8 +147,6 @@ def user_update_battry():
 
 
 
-
-
 def next_stop(current_user=None):
     global choice_next_stop
     if not current_user:
@@ -178,9 +176,9 @@ def next_stop(current_user=None):
         return None
 
     print("\nType the AIRPORT IDENT you want to go (e.g., EFHK):")
-    target_ident = input("Ident: ==> ").strip().upper()
 
-    chosen_airport = get_one_airport(target_ident)
+    chosen_airport = get_one_airport(current_user["ident"])
+
     if not chosen_airport:
         print("No next stop selected.")
         return None
@@ -223,7 +221,7 @@ def insert_km(user, distance):
     user_update()
     
 
-    print("\n==========================")
+    ("\n==========================")
     print(f"{user['username']}, you have traveled an additional {KM:.2f} km.")
     print(f"Total distance traveled with us: {total_km:.2f} km.")
     print(f"Current membership: {membership}")
@@ -231,15 +229,14 @@ def insert_km(user, distance):
 
 
 def user_info(current_user):
-    print("\n===== User Information =====")
-    print(f"Username       : {current_user.get('username', 'Unknown')}")
-    print(f"Email          : {current_user.get('email', 'Unknown')}")
-    print(f"Location       : {current_user.get('location', 'Unknown')}")
-    print(f"Battery        : {current_user.get('battery', 0)}%")
-    print(f"Travelled      : {current_user.get('KM', 0)} km")
-    print(f"membership     : {current_user.get('membership')}")
+    print("\n=============================")
+    print(f"{'Username':<20}: {current_user.get('username', 'Unknown')}")
+    print(f"{'Email':<20}: {current_user.get('email', 'Unknown')}")
+    print(f"{'Location':<20}: {current_user.get('location', 'Unknown')}")
+    print(f"{'Battery':<20}: {current_user.get('battery', 0)}%")
+    print(f"{'Travelled':<20}: {current_user.get('KM', 0):.2f} km")
+    print(f"{'Membership':<20}: {current_user.get('membership', 'Silver')}")
     print("==============================\n")
-
 
 def user_logout():
     try:
