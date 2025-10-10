@@ -15,7 +15,8 @@ def get_airports_code(iso_country=None):
             (iso_country,)
         )
         print(f"\nAirports in {iso_country}:")
-        print("\n=========================")
+
+        print("\n==================================================================")
         print(f"{'ID':<10} | {'Name':<50}")
         print("-" * 65)
         for airport in airports:
@@ -65,12 +66,12 @@ def get_one_airport(current_location=None):
                 continue
 
             airport_data = airport_results[0]
-            print("\n=========================")
+            print("\n==================================================================")
             print(f"{'Field':<20} | {'Value'}")
-            print("-" * 50)
+            print("=" * 66)
             for key, value in airport_data.items():
                 print(f"{key:<20} | {value}")
-            print("=" * 50 + "\n")
+            print("=" * 66 + "\n")
 
             current_ident = selected_code
             return airport_data

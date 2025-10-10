@@ -25,7 +25,8 @@ def user_register():
 
         print("User registered successfully!")
     except Exception as e:
-        print(f"An Err {e}")
+        print(f" An Err in (user_register) {e}")
+
 
 
 
@@ -71,7 +72,7 @@ def user_login():
             return False
 
     except Exception as e:
-        print(f"An Err {e}")
+        print(f" An Err in (user_login) {e}")
 
 
 
@@ -101,7 +102,8 @@ def user_delete():
         else:
             print("No user is currently logged in.")
     except Exception as e:
-        print(f"An Err {e}")
+        print(f" An Err in (user_delete) {e}")
+
 
 
 
@@ -109,24 +111,28 @@ def user_update():
     try:
         global current_user
         global choice_next_stop
+
         if not current_user or not choice_next_stop:
             print("Error: current_user or choice_next_stop not set.")
-   
-        update_query = query("update_user_location","update_user_battery")
-        rows_affected = run_query(update_query, (str(choice_next_stop['ident']), int(current_user["id"])))
-        if rows_affected > 0:
-            select_query = query("get_user_battery")
-            result = run_query(select_query, (int(current_user["id"]),), fetchone=True)
+            return 
 
-            if result:
-                current_user["battery"] = float(result["battery"])
-                current_user["location"] = choice_next_stop['ident']
+        update_query = query("update_user_location")
+        rows_affected = run_query(update_query, (str(choice_next_stop['ident']), int(current_user["id"])))
+
+        if rows_affected > 0:
+        
+            user_data = run_query(query("get_user_by_id"), (int(current_user["id"]),), fetchone=True)
+
+            if user_data:
+                current_user = dict(user_data)
+                print(f"Battery updated to {current_user['battery']}%")
             else:
                 print("Error: battery not fetched after update.")
         else:
             print("Error: No user was updated. Check user id.")
     except Exception as e:
-        print(f"An Err {e}")
+        print(f" An Err in (user_update) {e}")
+
 
 
 def user_update_battry():
@@ -136,107 +142,124 @@ def user_update_battry():
             print("Error: current_user .")
             return
 
-
         run_query(query("update_user_battery"), (int(current_user["id"]),))
         current_user["battery"] = 100
 
         print(f"User {current_user['username']} battery 100 .")
     except Exception as e:
-        print(f"An Err {e}")
+        print(f" An Err in (user_update_battry) {e}")
 
 
 
 
 def next_stop(current_user=None):
-    global choice_next_stop
-    if not current_user:
-        print("Error: No current user is logged in.")
-        return
-
     try:
-        battery_val = int(current_user.get('battery', 0))
-    except Exception:
-        battery_val = 0
+        global choice_next_stop
+        if not current_user:
+            print("Error: No current user is logged in.")
+            return
 
-    if battery_val <= 25:
-        charging = input("UR battery under 25. You can not travel. If you want to charge, type (Y):=>").upper()
-        if charging == "Y":
-            user_update_battry()
-            current_user["battery"] = 100
-            print(f"Your battery is {current_user['battery']}.")
-        else:
-            print("U can not travel.")
+        try:
+            battery_val = int(current_user.get('battery', 0))
+        except Exception:
+            battery_val = 0
+
+        if battery_val <= 25:
+            charging = input("UR battery under 25. You can not travel. If you want to charge, type (Y):=>").upper()
+            if charging == "Y":
+                user_update_battry()
+                current_user["battery"] = 100
+                print(f"Your battery is {current_user['battery']}.")
+            else:
+                print("U can not travel.")
+                return None
+
+        destination_input = input("Where do you want to go? Type country code (e.g., FI, US, SW): ").upper()
+        airports = get_airports_code(destination_input)
+
+        if not airports:
+            print("No airports found for this country.")
             return None
 
-    destination_input = input("Where do you want to go? Type country code (e.g., FI, US, SW): ").upper()
-    airports = get_airports_code(destination_input)
+        print("\nType the AIRPORT IDENT you want to go (e.g., EFHK):")
 
-    if not airports:
-        print("No airports found for this country.")
-        return None
+        chosen_airport = get_one_airport(current_user["ident"])
 
-    print("\nType the AIRPORT IDENT you want to go (e.g., EFHK):")
+        if not chosen_airport:
+            print("No next stop selected.")
+            return None
 
-    chosen_airport = get_one_airport(current_user["ident"])
+        choice_next_stop = chosen_airport
 
-    if not chosen_airport:
-        print("No next stop selected.")
-        return None
-
-    choice_next_stop = chosen_airport
-
-    distance = haversine(
-        float(current_user["latitude_deg"]),
-        float(current_user["longitude_deg"]),
-        float(chosen_airport["latitude_deg"]),
-        float(chosen_airport["longitude_deg"])
-    )
-
-    insert_km(current_user, distance)
-    return choice_next_stop
+        distance = haversine(
+            float(current_user["latitude_deg"]),
+            float(current_user["longitude_deg"]),
+            float(chosen_airport["latitude_deg"]),
+            float(chosen_airport["longitude_deg"])
+        )
+        user_update()
+        insert_km(current_user, distance)
+        return choice_next_stop
+    except Exception as e: 
+        print(f" An Err in (next_stop) {e}")
 
 
 
 def insert_km(user, distance):
-    user_id = user["id"]
-    KM = float(distance)
+    try:
+        user_id = user["id"]
+        KM = float(distance)
 
-    run_query(query("update_user_km"), (KM, user_id))
+        run_query(query("update_user_km"), (KM, user_id))
 
-    check = run_query(query("get_user_km",), (user_id,), fetchone=True)
+        check = run_query(query("get_user_km",), (user_id,), fetchone=True)
+        total_km = float(check["KM"]) if check and check["KM"] is not None else 0.0
 
-    total_km = check["KM"] if check else 0
+        if total_km >= 100000:
+            membership = "Diamond"
+        elif total_km >= 1000:
+            membership = "Gold"
+        else:
+            membership = "Silver"
 
-    if 1000 <= total_km <= 100000:
-        membership = "Gold"
-    elif total_km > 100000:
-        membership = "Diamond"
-    else:
-        membership = "Silver"
+        run_query(query("update_user_membership"), (membership, user_id))
 
-    run_query(query("update_user_membership"), (membership, user_id))
+        updated_user = run_query(query("get_user_by_id"), (user_id,), fetchone=True)
+        if updated_user:
+            user.update(dict(updated_user))
 
-    user["membership"] = membership
-    user["KM"] = total_km
-    user_update()
-    
+        print("\n==================================================================")
+        print(f"{user['username']}, you have traveled an additional {KM:.2f} km.")
+        print(f"Total distance traveled with us: {total_km:.2f} km.")
+        print(f"Current membership: {membership}")
+        print("\n==================================================================")
+    except Exception as e: 
+        print(f" An Err in (insert_km) {e}")
 
-    ("\n==========================")
-    print(f"{user['username']}, you have traveled an additional {KM:.2f} km.")
-    print(f"Total distance traveled with us: {total_km:.2f} km.")
-    print(f"Current membership: {membership}")
-    print("============================\n")
+
+
+
+
 
 
 def user_info(current_user):
-    print("\n=============================")
-    print(f"{'Username':<20}: {current_user.get('username', 'Unknown')}")
-    print(f"{'Email':<20}: {current_user.get('email', 'Unknown')}")
-    print(f"{'Location':<20}: {current_user.get('location', 'Unknown')}")
-    print(f"{'Battery':<20}: {current_user.get('battery', 0)}%")
-    print(f"{'Travelled':<20}: {current_user.get('KM', 0):.2f} km")
-    print(f"{'Membership':<20}: {current_user.get('membership', 'Silver')}")
-    print("==============================\n")
+    try:
+        print("\n=============================")
+        print(f"{'Username':<20}: {current_user.get('username', 'Unknown')}")
+        print(f"{'Email':<20}: {current_user.get('email', 'Unknown')}")
+        print(f"{'Location':<20}: {current_user.get('location', 'Unknown')}")
+        print(f"{'Battery':<20}: {current_user.get('battery', 0)}%")
+        print(f"{'Travelled':<20}: {current_user.get('KM', 0):.2f} km")
+        print(f"{'Membership':<20}: {current_user.get('membership', 'Silver')}")
+        print("==============================\n")
+    except Exception as e: 
+        print(f" An Err in (user_info) {e}")
+
+
+
+
+
+
 
 def user_logout():
     try:

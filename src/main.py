@@ -1,5 +1,4 @@
-from Queries.user import user_register, user_login, user_delete, next_stop, user_info, user_logout, current_user, user_update
-from context.run import run_query
+from Queries.user import user_register, user_login, user_delete, next_stop, user_info, user_logout
 
 def main():
     current_user = None

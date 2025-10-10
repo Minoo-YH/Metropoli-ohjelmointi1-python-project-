@@ -7,17 +7,17 @@ def run_query(query, params=None, fetchone=False):
         cursor.execute(query, params or ())
         first = (query or "").lstrip().split(" ", 1)[0].upper()
 
-
         if first in ("INSERT", "UPDATE", "DELETE"):
             try:
                 conn.commit()
             except Exception:
                 pass
+            return cursor.rowcount
+
         if first == "SELECT":
             return cursor.fetchone() if fetchone else cursor.fetchall()
 
-        return None
-
+        return None  
     finally:
         try:
             cursor.close()
@@ -27,4 +27,3 @@ def run_query(query, params=None, fetchone=False):
             conn.close()
         except Exception:
             pass
-
